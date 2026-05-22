@@ -82,7 +82,7 @@ export default function LoginPage() {
             </Button>
 
             <p className="text-xs text-muted-foreground text-center">
-              Demo credentials: admin / admin@0000
+              Demo credentials: -----------------------------
             </p>
           </form>
         </CardContent>

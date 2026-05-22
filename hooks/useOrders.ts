@@ -45,16 +45,15 @@ export function useOrders() {
       setLoading(true)
       setError(null)
       try {
-        const calculated = orderData.order_value * orderData.price
+        // const calculated = orderData.order_value * orderData.price
 
         const { data, error: insertError } = await supabase
-          .from('orders')
+          .from('order')
           .insert([
             {
               order_no: orderData.order_no,
               order_value: orderData.order_value,
               price: orderData.price,
-              calculated_value: calculated,
             },
           ])
           .select()

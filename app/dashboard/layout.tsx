@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { isLoggedIn, logout } from '@/lib/user'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, Package, Users, FileText, ShoppingCart, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, Users, FileText, ShoppingCart, Printer, LogOut } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
@@ -36,7 +36,8 @@ export default function DashboardLayout({
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/products', label: 'Products', icon: Package },
     { href: '/dashboard/customers', label: 'Customers', icon: Users },
-    { href: '/dashboard/orders', label: 'Orders & Billing', icon: ShoppingCart },
+    // { href: '/dashboard/orders', label: 'Orders & Billing', icon: ShoppingCart },
+    { href: '/dashboard/billing', label: 'Billing Print', icon: Printer },
     { href: '/dashboard/blog', label: 'Blog & News', icon: FileText },
   ]
 
@@ -48,8 +49,8 @@ export default function DashboardLayout({
       <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-600 to-emerald-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">VS</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #a0dac3, #02ca78)' }}>
+              <img src="/icon.png" alt="Vellore Santhai Logo" className="w-full h-full object-cover" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Vellore Santhai</h1>
@@ -59,7 +60,7 @@ export default function DashboardLayout({
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 text-red-600 border-red-300 hover:bg-red-50"
+            className="hover:cursor-pointer gap-2 h-10 text-red-600 border-red-300 hover:bg-red-500"
           >
             <LogOut className="h-4 w-4" />
             Logout
@@ -80,8 +81,8 @@ export default function DashboardLayout({
                     variant="ghost"
                     className={`w-full justify-start gap-3 h-11 text-base font-medium transition-all ${
                       active
-                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-r-4 border-green-600'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'hover:cursor-pointer bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-r-4 border-green-600'
+                        : 'hover:cursor-pointer text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -92,11 +93,11 @@ export default function DashboardLayout({
             })}
           </nav>
 
-          <div className="absolute bottom-4 left-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          {/* <div className="absolute bottom-4 left-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-xs text-blue-800">
               <strong>Tip:</strong> Use the sidebar to navigate between different sections of the admin panel.
             </p>
-          </div>
+          </div> */}
         </aside>
 
         {/* Main Content */}

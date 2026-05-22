@@ -59,7 +59,7 @@ export default function CustomersPage() {
     <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Customers Management</h1>
-        <p className="text-gray-600">View and edit all customer information</p>
+        <p className="text-red-600">#DO NOT EDIT UNLESS REQUEST. This is public user data</p>
       </div>
 
       {error && (
@@ -98,11 +98,11 @@ export default function CustomersPage() {
                       </h3>
                       <div className="flex gap-6 mt-2 text-sm text-gray-600 flex-wrap">
                         <span className="flex items-center gap-1">
-                          📱 {customer.mobile}
+                          📱 {customer.phone}
                         </span>
-                        {customer.alt_mobile && (
+                        {customer.alternate_phone && (
                           <span className="flex items-center gap-1">
-                            📞 {customer.alt_mobile}
+                            📞 {customer.alternate_phone}
                           </span>
                         )}
                         {customer.email && (
@@ -250,7 +250,7 @@ export default function CustomersPage() {
                           placeholder="9876543210"
                         />
                       ) : (
-                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{customer.mobile}</p>
+                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{customer.phone}</p>
                       )}
                     </div>
 
@@ -276,7 +276,7 @@ export default function CustomersPage() {
                         />
                       ) : (
                         <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
-                          {customer.alt_mobile || 'Not provided'}
+                          {customer.alternate_phone || 'Not provided'}
                         </p>
                       )}
                     </div>

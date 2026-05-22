@@ -66,12 +66,37 @@ export const useProducts = () => {
     }
   }
 
+  const addProduct = async (newProduct: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error: insertError } = await supabase
+        .from('products')
+        .insert([{
+          ...newProduct,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }])
+        .select()
+
+      if (insertError) throw insertError
+      
+      if (data && data.length > 0) {
+        setProducts([...products, data[0]])
+        return true
+      }
+      return false
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add product')
+      return false
+    }
+  }
+
   return {
     products,
     loading,
     error,
     updateProduct,
     deleteProduct,
+    addProduct,
     refetch: fetchProducts,
   }
 }

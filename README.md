@@ -159,8 +159,8 @@ hooks/
 
 | Field | Value |
 |-------|-------|
-| Username | admin |
-| Password | admin@0000 |
+| Username | ********* |
+| Password | ********* |
 
 **Note**: Credentials are hardcoded in `/lib/user.js` - Edit to change them.
 

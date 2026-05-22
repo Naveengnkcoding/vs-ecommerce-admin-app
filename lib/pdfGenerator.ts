@@ -2,12 +2,63 @@ export interface BillData {
   orderNo: string
   orderDate: string
   customerName?: string
+  customerPhone?: string
+  customerAddress?: string
   items: Array<{
     name: string
     quantity: number
     price: number
   }>
   notes?: string
+}
+
+export function parseWhatsAppBillMessage(message: string): BillData {
+  const normalized = message.replace(/\r\n/g, '\n').trim()
+  const lines = normalized.split('\n').map((line) => line.trim()).filter(Boolean)
+
+  const orderNoMatch = normalized.match(/-\s*([A-Za-z0-9-]+)/)
+  const orderNo = orderNoMatch ? orderNoMatch[1] : `ORDER-${Date.now()}`
+
+  const customerNameMatch = normalized.match(/Name:\s*(.+)/i)
+  const customerPhoneMatch = normalized.match(/Phone:\s*(.+)/i)
+  const customerAddressMatch = normalized.match(/Address:\s*(.+)/i)
+
+  const itemLines = lines.filter((line) => /^•\s*/.test(line))
+  const items = itemLines
+    .map((line) => {
+      const match = line.match(/^•\s*(.+?)\s*x\s*([\d.]+)\s*=\s*₹\s*([\d.,]+)/i)
+      if (!match) return null
+      return {
+        name: match[1].trim(),
+        quantity: parseFloat(match[2]),
+        price: parseFloat(match[3].replace(/,/g, '')),
+      }
+    })
+    .filter((item): item is { name: string; quantity: number; price: number } => Boolean(item))
+
+  const totalMatch = normalized.match(/Total Amount:\s*₹\s*([\d.,]+)/i)
+  const totalAmount = totalMatch ? parseFloat(totalMatch[1].replace(/,/g, '')) : undefined
+
+  const notesIndex = lines.findIndex((line) => /Thank you/i.test(line) || /Total Amount:/i.test(line))
+  const notes = notesIndex >= 0 ? lines.slice(notesIndex + 1).join(' ') : ''
+
+  return {
+    orderNo,
+    orderDate: new Date().toLocaleDateString(),
+    customerName: customerNameMatch?.[1].trim(),
+    customerPhone: customerPhoneMatch?.[1].trim(),
+    customerAddress: customerAddressMatch?.[1].trim(),
+    items: items.length > 0
+      ? items
+      : [
+          {
+            name: 'Order items not parsed',
+            quantity: 1,
+            price: totalAmount ?? 0,
+          },
+        ],
+    notes: notes || undefined,
+  }
 }
 
 export function generateBillPDF(billData: BillData) {
@@ -150,6 +201,18 @@ export function generateBillPDF(billData: BillData) {
             <span>${billData.customerName}</span>
           </div>
           ` : ''}
+          ${billData.customerPhone ? `
+          <div class="info-group">
+            <label>Phone:</label>
+            <span>${billData.customerPhone}</span>
+          </div>
+          ` : ''}
+          ${billData.customerAddress ? `
+          <div class="info-group address-group">
+            <label>Address:</label>
+            <span>${billData.customerAddress}</span>
+          </div>
+          ` : ''}
         </div>
 
         <table>
@@ -207,7 +270,7 @@ export function downloadBillPDF(billData: BillData) {
     filename: `Bill-${billData.orderNo}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: [148, 105], orientation: 'portrait' }, // A5 size (half of A4)
+    jsPDF: { unit: 'mm', format: [148, 210], orientation: 'portrait' }, // A5 size (half of A4)
   }
 
   // Dynamically import html2pdf to avoid SSR issues
