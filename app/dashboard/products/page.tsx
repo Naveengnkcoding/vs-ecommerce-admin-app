@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Trash2, Check, X, Edit2 } from 'lucide-react'
+import { Loader2, Trash2, Check, X, Edit2, Plus, PackagePlus } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -22,11 +22,262 @@ const CATEGORIES = [
   { value: 'meat', label: 'Meat' },
 ]
 
+const EMPTY_FORM = {
+  name_en: '',
+  name_ta: '',
+  price: '',
+  weight: '',
+  category: '',
+  image_url: '',
+  in_stock: true,
+  sort_order: '',
+}
+
+// ─── Add Product Modal ────────────────────────────────────────────────────────
+function AddProductModal({
+  open,
+  onClose,
+  onAdd,
+}: {
+  open: boolean
+  onClose: () => void
+  onAdd: (data: typeof EMPTY_FORM) => Promise<void>
+}) {
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+
+  const set = (field: string, value: any) =>
+    setForm(prev => ({ ...prev, [field]: value }))
+
+  const handleSubmit = async () => {
+    if (!form.name_en.trim()) return setFormError('English name is required.')
+    if (!form.category) return setFormError('Please select a category.')
+    if (!form.price || isNaN(parseFloat(form.price))) return setFormError('Enter a valid price.')
+    setFormError(null)
+    setSubmitting(true)
+    await onAdd(form)
+    setSubmitting(false)
+    setForm(EMPTY_FORM)
+    onClose()
+  }
+
+  const handleClose = () => {
+    setForm(EMPTY_FORM)
+    setFormError(null)
+    onClose()
+  }
+
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={handleClose}
+      />
+
+      {/* Modal */}
+      <div className="relative z-10 w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-600 to-emerald-500 px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/20 rounded-lg p-2">
+              <PackagePlus className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">Add New Product</h2>
+              <p className="text-green-100 text-xs">Fill in the product details below</p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            className="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-1.5 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          {formError && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2.5 rounded-lg">
+              <X className="h-4 w-4 flex-shrink-0" />
+              {formError}
+            </div>
+          )}
+
+          {/* Row 1 — Names */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                English Name <span className="text-red-400">*</span>
+              </label>
+              <Input
+                placeholder="e.g. Tomato"
+                value={form.name_en}
+                onChange={e => set('name_en', e.target.value)}
+                className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                Tamil Name
+              </label>
+              <Input
+                placeholder="e.g. தக்காளி"
+                value={form.name_ta}
+                onChange={e => set('name_ta', e.target.value)}
+                className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Row 2 — Price & Weight */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                Price (₹) <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₹</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  value={form.price}
+                  onChange={e => set('price', e.target.value)}
+                  className="h-10 pl-7 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                Weight / Unit
+              </label>
+              <Input
+                placeholder="e.g. 500g, 1kg"
+                value={form.weight}
+                onChange={e => set('weight', e.target.value)}
+                className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Row 3 — Category & Sort Order */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                Category <span className="text-red-400">*</span>
+              </label>
+              <Select value={form.category} onValueChange={v => set('category', v)}>
+                <SelectTrigger className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+                Sort Order
+              </label>
+              <Input
+                type="number"
+                placeholder="e.g. 10"
+                value={form.sort_order}
+                onChange={e => set('sort_order', e.target.value)}
+                className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Row 4 — Image URL */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
+              Image URL
+            </label>
+            <Input
+              placeholder="https://example.com/image.jpg"
+              value={form.image_url}
+              onChange={e => set('image_url', e.target.value)}
+              className="h-10 border-gray-200 focus:ring-2 focus:ring-green-400 focus:border-transparent"
+            />
+          </div>
+
+          {/* Row 5 — Stock Toggle */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
+              Stock Status
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => set('in_stock', true)}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-all ${
+                  form.in_stock
+                    ? 'bg-green-500 text-white border-green-500 shadow-sm'
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-green-300'
+                }`}
+              >
+                ✓ In Stock
+              </button>
+              <button
+                type="button"
+                onClick={() => set('in_stock', false)}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-all ${
+                  !form.in_stock
+                    ? 'bg-red-500 text-white border-red-500 shadow-sm'
+                    : 'bg-white text-gray-500 border-gray-200 hover:border-red-300'
+                }`}
+              >
+                ✗ Out of Stock
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={submitting}
+            className="border-gray-200 text-gray-600 hover:bg-gray-100"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white gap-2 px-6 shadow-md"
+          >
+            {submitting ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> Adding…</>
+            ) : (
+              <><Plus className="h-4 w-4" /> Add Product</>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProductsPage() {
-  const { products, loading, error, updateProduct, deleteProduct } = useProducts()
+  const { products, loading, error, updateProduct, deleteProduct, addProduct } = useProducts()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, any>>({})
   const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [showAddModal, setShowAddModal] = useState(false)
 
   const filteredProducts = filterCategory === 'all'
     ? products
@@ -65,6 +316,19 @@ export default function ProductsPage() {
     }
   }
 
+  const handleAddProduct = async (form: typeof EMPTY_FORM) => {
+    await addProduct({
+      name_en: form.name_en,
+      name_ta: form.name_ta,
+      price: parseFloat(form.price) || 0,
+      weight: form.weight,
+      category: form.category,
+      image_url: form.image_url,
+      in_stock: form.in_stock,
+      sort_order: parseInt(form.sort_order) || 0,
+    })
+  }
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -75,12 +339,26 @@ export default function ProductsPage() {
 
   return (
     <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+      <AddProductModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddProduct}
+      />
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Products Management</h1>
           <p className="text-gray-600">Edit all product details including names, prices, and index</p>
         </div>
-        <div className="w-48">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowAddModal(true)}
+            className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white gap-2 shadow-md h-10 px-4"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
+          <div className="w-48">
           <Select value={filterCategory} onValueChange={setFilterCategory}>
             <SelectTrigger className="bg-white border-gray-200">
               <SelectValue placeholder="Filter by category" />
@@ -94,6 +372,7 @@ export default function ProductsPage() {
               ))}
             </SelectContent>
           </Select>
+          </div>
         </div>
       </div>
 

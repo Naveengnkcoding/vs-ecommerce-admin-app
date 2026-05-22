@@ -57,14 +57,24 @@ export default function DashboardLayout({
               <p className="text-xs text-gray-600">Admin Dashboard</p>
             </div>
           </div>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            className="hover:cursor-pointer gap-2 h-10 text-red-600 border-red-300 hover:bg-red-500"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.deshkeyboard.com/tamil-typing/"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center justify-center rounded-lg border border-green-300 bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-sm transition hover:bg-green-50"
+            >
+              Tamil Typing Keypad
+            </a>
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="hover:cursor-pointer gap-2 h-10 text-red-600 border-red-300 hover:bg-red-500"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
